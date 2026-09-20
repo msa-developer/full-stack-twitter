@@ -2,40 +2,26 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    userName: {
       type: String,
-      unique: true,
       required: true,
+      unique: true,
     },
     fullName: {
       type: String,
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: {
       type: String,
       required: true,
-      minLength: 6,
-    },
-    email: {
-      type: String,
       unique: true,
-      required: true,
     },
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: [],
-      },
-    ],
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: [],
-      },
-    ],
-    profileImg: {
+    profilePic: {
       type: String,
       default: "",
     },
@@ -51,10 +37,31 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    linkPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        default: [],
+        ref: "post",
+      },
+    ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        default: [],
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        default: [],
+      },
+    ],
   },
   { timestamps: true },
 );
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("user", userSchema);
 
 export default User;

@@ -1,44 +1,74 @@
-import generateToken from "../lib/generateToken.js";
+import generateTokenAndSetCookies from "../lib/auth/generateTokenAndSetCookies.js";
 import User from "../models/user.model.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+
+const checkValid = (email, password) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+
+  if (password.length < 6)
+    return res
+      .status(400)
+      .json({ message: "password length should be min 6 characters" });
+};
 
 export const Signup = async (req, res) => {
+  const { fullName, email, password, userName } = req.body;
   try {
-    const { fullName, username, email, password } = req.body;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!fullName || !email || !password || !userName)
+      return res.status(400).json({ message: "Fill all details" });
 
-    if (!emailRegex.test(email)) {
-      res.status(400).json({ message: "Invalid Email" });
-    }
-    const existUser = await User.findOne({ username });
+    checkValid(email, password);
 
-    if (existUser) res.status(400).json({ message: "User already exists" });
+    const userNameExists = await User.findOne({ userName });
+    if (userNameExists)
+      return res.status(400).json({ message: "user name is already taken" });
 
-    existEmail = await User.findOne({ existEmail });
-    if (existEmail) res.status(400).json({ message: "User already exists" });
+    const emailExists = await User.findOne({ email });
+    if (emailExists)
+      return res.status(400).json({ message: "Email Already In Use" });
 
     const salt = await bcrypt.genSalt(10);
     const hashPass = await bcrypt.hash(password, salt);
 
     const newUser = new User({
-      fullName,
       email,
       password: hashPass,
-      username,
+      userName,
+      fullName,
     });
+    await newUser.save();
 
-    if (newUser) {
-      generateToken(newUser._id, res);
-      await newUser.save();
-      res.status(201).json(newUser);
-    } else {
-      res.staus(400).json({ message: "Something went wrong" });
-    }
+    generateTokenAndSetCookies(newUser._id, res);
+    return res.status(201).json(newUser);
   } catch (err) {
-    console.log(erro);
-    res.status(500).json({ message: "Error in Signup function" });
+    console.error(err);
+    return res.status(500).json({ message: "Error in Signup function" });
   }
 };
 
-export const Login = async (req, res) => {};
-export const Logout = async (req, res) => {};
+export const Login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    if (!fullName || !email || !password || !userName)
+      return res.status(400).json({ message: "Fill all details" });
+
+    checkValid(email, password);
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const passwordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!passwordCorrect)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    generateTokenAndSetCookies(user._id, res);
+    return res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "Error in login" });
+  }
+};
