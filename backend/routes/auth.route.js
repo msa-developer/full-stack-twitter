@@ -9,7 +9,7 @@ import checkAuth from "../middleware/checkAuth.js";
 
 const authRouter = express.Router();
 
-authRouter.post("/authUser", checkAuth, getAuthUser);
+authRouter.get("/authUser", checkAuth, getAuthUser);
 authRouter.post("/signup", Signup);
 authRouter.post("/login", Login);
 authRouter.post("/logout", Logout);

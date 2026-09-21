@@ -76,23 +76,24 @@ export const Login = async (req, res) => {
   }
 };
 
-export const Logout = (_, res) => {
+export const Logout = async (_, res) => {
   try {
-    res.cookie("jwt", "", {
+    res.cookies("jwt", "", {
       maxAge: 0,
     });
-    res.status(200).json({ message: "user logged out" });
+    return res.status(200).json({ message: "loged out" });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ message: "error in logout func" });
+    return res.status(500).json({ message: "Loged out successfully" });
   }
 };
 
 export const getAuthUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
+    return res.status(200).json(user);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "error in authUser func" });
+    return res.status(500).json({ message: "error getAuthUser" });
   }
 };
