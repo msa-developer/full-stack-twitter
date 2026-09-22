@@ -87,13 +87,3 @@ export const Logout = async (_, res) => {
     return res.status(500).json({ message: "Loged out successfully" });
   }
 };
-
-export const getAuthUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password");
-    return res.status(200).json(user);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "error getAuthUser" });
-  }
-};

@@ -7,11 +7,9 @@ const checkAuth = async (req, res, next) => {
     if (!token) return res.status(401).json({ message: "unauthorized user" });
 
     const decode = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decode) return res.status(401).json({ message: "invalid token" });
+    if (!decode) return res.status(401).json({ message: "Invalid token" });
 
-    console.log(decode);
-
-    const user = await User.findById(decode.userId);
+    const user = await User.findById(decode.userId).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
 
     req.user = user;
