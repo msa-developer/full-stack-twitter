@@ -7,24 +7,21 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    fullName: {
+    password: {
       type: String,
+      required: true,
+      minLen: 6,
     },
     email: {
       type: String,
       required: true,
       unique: true,
     },
-    password: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    profilePic: {
+    profilPic: {
       type: String,
       default: "",
     },
-    coverImg: {
+    coverPic: {
       type: String,
       default: "",
     },
@@ -32,25 +29,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    link: {
-      type: String,
-      default: "",
-    },
-    linkPosts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        default: [],
-        ref: "post",
-      },
-    ],
-    followers: [
+    following: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         default: [],
       },
     ],
-    following: [
+    followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
