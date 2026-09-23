@@ -7,7 +7,7 @@ const EmailIsValid = (email) => {
   return emailRegex.test(email);
 };
 
-const isPasswordMinLen = (password) => password.length < 6;
+const isPasswordTooShort = (password) => password.length < 6;
 
 export const signup = async (req, res) => {
   const { email, password, userName } = req.body;
@@ -18,18 +18,21 @@ export const signup = async (req, res) => {
     if (!EmailIsValid(email))
       return res.status(400).json({ message: "Invalid email" });
 
-    if (isPasswordMinLen(password))
+    if (isPasswordTooShort(password))
       return res
         .status(400)
         .json({ message: "password should be min 6 characters" });
 
-    const emailExists = await User.findOne({ email });
-    if (emailExists)
-      return res.status(400).json({ message: "Email already in use" });
+    const exists = await User.findOne({
+      $or: [{ email }, { userName }],
+    }).select("-password");
 
-    const userNameExists = await User.findOne({ userName });
-    if (userNameExists)
-      return res.status(400).json({ message: "username is already taken" });
+    if (exists) {
+      if (exists.userName === userName)
+        return res.status(400).json({ message: "username is already taken" });
+      if (exists.email === email)
+        return res.status(400).json({ message: "email already in use" });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
@@ -43,7 +46,9 @@ export const signup = async (req, res) => {
     await newUser.save();
     generateTokenAndSetCookies(newUser._id, res);
 
-    return res.status(201).json(newUser);
+    const userObj = newUser.toObject();
+    delete userObj.password;
+    return res.status(201).json(userObj);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "error in signup func" });
@@ -59,11 +64,6 @@ export const login = async (req, res) => {
     if (!EmailIsValid(email))
       return res.status(400).json({ message: "invalid email" });
 
-    if (isPasswordMinLen(password))
-      return res
-        .status(400)
-        .json({ message: "password should be minimum 6 characters" });
-
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "user not found" });
 
@@ -72,7 +72,10 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "invalid credentails" });
 
     generateTokenAndSetCookies(user._id, res);
-    return res.status(200).json(user);
+
+    const userObj = user.toObject();
+    delete userObj.password;
+    return res.status(200).json(userObj);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "erorr in login function" });
@@ -80,13 +83,8 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  try {
-    res.cookie("jwt", "", {
-      maxAge: 0,
-    });
-    return res.status(200).json({ message: "User logged out" });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "erorr in logout func" });
-  }
+  res.cookie("jwt", "", {
+    maxAge: 0,
+  });
+  return res.status(200).json({ message: "User logged out" });
 };
