@@ -1,11 +1,15 @@
 import express from "express";
-import checkAuth from "../middleware/checkAuth.js";
-import { getFollow, getUserProfile } from "../controller/user.controller.js";
+import checkAuthUser from "../middleware/checkAuth.js";
+import {
+  followUnfollowUser,
+  getUserDetails,
+} from "../controllers/user.controller.js";
 
 const userRouter = express.Router();
 
-userRouter.use(checkAuth);
-userRouter.get("/profile/:userName", getUserProfile);
-userRouter.post("follow/:id", getFollow);
+userRouter.use(checkAuthUser);
+
+userRouter.get("/profile", getUserDetails);
+userRouter.post("/followers/:id", followUnfollowUser);
 
 export default userRouter;
