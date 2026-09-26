@@ -12,10 +12,12 @@ export const getUserDetails = async (req, res) => {
 
 export const getSuggestedUsers = async (req, res) => {
   try {
-    const randomUsers = await User.aggregate([
+    const suggestedUsers = await User.aggregate([
       {
         $match: {
-          $ne: req.user._id,
+          _id: {
+            $nin: [req.user._id, ...req.user.following],
+          },
         },
       },
       {
@@ -23,16 +25,12 @@ export const getSuggestedUsers = async (req, res) => {
           size: 10,
         },
       },
+      {
+        $project: {
+          password: 0,
+        },
+      },
     ]);
-
-    const followingUsers = await User.findById(req.user._id).select(
-      "following",
-    );
-    const filteredUsers = randomUsers.filter(
-      (user) => !followingUsers.following.includes(user._id),
-    );
-    const suggestedUsers = filteredUsers.slice(0, 4);
-    suggestedUsers.forEach((user) => (user.password = null));
     return res.status(200).json(suggestedUsers);
   } catch (err) {
     console.error(err);
