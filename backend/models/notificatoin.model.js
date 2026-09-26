@@ -5,16 +5,17 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ["reply", "follow", "like"],
+      required: true,
     },
     from: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
       required: true,
+      ref: "User",
     },
     to: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
       required: true,
+      ref: "User",
     },
   },
   { timestamps: true },
