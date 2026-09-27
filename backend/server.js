@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.route.js";
 import connectDB from "./db.js";
 import userRouter from "./routes/user.route.js";
+import postRouter from "./routes/post.route.js";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -19,6 +20,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
+app.use("/api/posts", postRouter);
 
 connectDB().then(() => {
   app.listen(process.env.PORT, () => {
