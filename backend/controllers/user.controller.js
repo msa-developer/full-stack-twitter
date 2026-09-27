@@ -132,7 +132,7 @@ export const updateUserProfile = async (req, res) => {
           user.profileImg.split("/").pop().split(".")[0],
         );
       const profile = await cloudinary.uploader.upload(profileImg);
-      const url = await profile.secure_url;
+      const url = profile.secure_url;
       profileImg = url;
     }
 
@@ -142,7 +142,7 @@ export const updateUserProfile = async (req, res) => {
           user.coverImg.split("/").pop().split(".")[0],
         );
       const upload = await cloudinary.uploader.upload(coverImg);
-      const url = await upload.secure_url;
+      const url = upload.secure_url;
       coverImg = url;
     }
 
