@@ -91,70 +91,72 @@ export const followUnfollowUser = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
-  const { fullName, email, userName, currentPassword, newPassword, bio, link } =
-    req.body;
-  let { profileImg, coverImg } = req.body;
-  const userId = req.user._id;
-
   try {
+    const {
+      fullName,
+      userName,
+      email,
+      newPassword,
+      currentPassword,
+      bio,
+      link,
+    } = req.body;
+    let { profileImg, coverImg } = req.body;
+
     let user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if ((!newPassword && currentPassword) || (!currentPassword && newPassword))
+    // manage password
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ message: "Provide all pasword fields" });
+
+    const isCurrentPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isCurrentPasswordCorrect)
+      return res.status(400).json({ message: "current password incorrect" });
+
+    if (newPassword.length < 6)
       return res
         .status(400)
-        .json({ message: "Please provide both current and new password" });
+        .json({ message: "password should contain minimum 6 characters" });
 
-    if (newPassword && currentPassword) {
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      if (!isMatch)
-        return res
-          .status(400)
-          .json({ message: "current password is incorrect" });
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
 
-      if (password.length < 6)
-        return res
-          .status(400)
-          .json({ message: "password should be min 6 characters" });
-
-      const salt = await bcrypt.genSalt(10);
-      const hashPass = await bcrypt.hash(newPassword, salt);
-
-      if (profileImg) {
-        if (user.profileImg) {
-          await cloudinary.uploader.destroy(
-            user.profileImg.split("/").pop().split(".")[0],
-          );
-        }
-
-        const res = await cloudinary.uploader.upload(profileImg);
-        profileImg = res.secure_url;
-      }
-
-      if (coverImg) {
-        if (user.coverImg)
-          await cloudinary.uploader.destroy(
-            user.coverImg.split("/").pop().split(".")[0],
-          );
-
-        const res = await cloudinary.uploader.upload(coverImg);
-        coverImg = res.secure_url;
-      }
-
-      user.fullName = fullName || user.fullName;
-      user.userName = userName || user.userName;
-      user.email = email || user.email;
-      user.bio = bio || user.bio;
-      user.link = link || user.link;
-      user.profileImg = profileImg || user.profileImg;
-      user.coverImg = coverImg || user.coverImg;
-
-      user = await user.save();
-      user.password = null;
-      return res.status(200).json(user);
+    if (profileImg) {
+      //https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg
+      if (user.profileImg)
+        await cloudinary.uploader.destroy(
+          user.profileImg.split("/").pop().split(".")[0],
+        );
+      const profile = await cloudinary.uploader.upload(profileImg);
+      const url = await profile.secure_url;
+      profileImg = url;
     }
+
+    if (coverImg) {
+      if (user.coverImg)
+        await cloudinary.uploader.desotry(
+          user.coverImg.split("/").pop().split(".")[0],
+        );
+      const upload = await cloudinary.uploader.upload(coverImg);
+      const url = await upload.secure_url;
+      coverImg = url;
+    }
+
+    user.password = hashPassword || user.password;
+    user.email = email || user.email;
+    user.fullName = fullName || user.fullName;
+    user.userName = userName || user.userName;
+    user.bio = bio || user.bio;
+    user.link = link || user.link;
+
+    user.password = null;
+    return res.status(200).json(user);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Error in updateUserProfile" });
+    return res.status(500).json({ message: "error in updateUserProfile" });
   }
 };
