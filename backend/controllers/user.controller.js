@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const suggestUsers = async (req, res) => {
@@ -34,53 +35,59 @@ export const followUnfollow = async (req, res) => {
     const currentUser = await User.findById(req.user._id);
     const targetUser = await User.findById(req.params.id);
 
-    const isFollowing = currentUser.following.includes(targetUser._id);
+    if (!targetUser) return res.status(404).json({ message: "user not found" });
 
     if (req.user._id.toString() === req.params.id.toString())
       return res
         .status(400)
         .json({ message: "cannot follow or unfollow yourself" });
 
+    //map
+    const isFollowing = currentUser.following
+      .map((id) => id.toString())
+      .includes(targetUser._id.toString());
+
+    //some
+    // const isFollowing = currentUser.following.some(
+    //   (id) => id.toString() === targetUser._id.toString(),
+    // );
+
     if (isFollowing) {
       // unfollow
-      await User.findById(
-        req.user._id,
+      await User.findByIdAndUpdate(
+        { _id: req.user._id },
         {
           $pull: {
-            following: req.params.id,
+            following: targetUser._id.toString(),
           },
         },
-        { new: true },
       );
-      await User.findById(
-        req.params.id,
+      await User.findByIdAndUpdate(
+        { _id: req.params.id },
         {
           $pull: {
-            followers: req.user._id,
+            followers: currentUser._id.toString(),
           },
         },
-        { new: true },
       );
       return res.status(200).json({ message: "Unfollowed User" });
     } else {
       //follow
-      await User.findById(
-        req.params.id,
+      await User.findByIdAndUpdate(
+        { _id: req.params.id },
         {
           $push: {
-            followers: req.user._id,
+            followers: currentUser._id.toString(),
           },
         },
-        { new: true },
       );
-      await User.findById(
-        req.user._id,
+      await User.findByIdAndUpdate(
+        { _id: req.user._id },
         {
           $push: {
-            following: req.params.id,
+            following: targetUser._id.toString(),
           },
         },
-        { new: true },
       );
 
       const newNotification = new Notification({
