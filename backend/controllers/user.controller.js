@@ -32,76 +32,72 @@ export const suggestUsers = async (req, res) => {
 
 export const followUnfollow = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user._id);
-    const targetUser = await User.findById(req.params.id);
-
-    if (!targetUser) return res.status(404).json({ message: "user not found" });
-
     if (req.user._id.toString() === req.params.id.toString())
       return res
         .status(400)
         .json({ message: "cannot follow or unfollow yourself" });
 
-    //map
-    const isFollowing = currentUser.following
+    //  map method
+    const isFollowing = req.user.following
       .map((id) => id.toString())
-      .includes(targetUser._id.toString());
+      .includes(req.params.id.toString());
 
-    //some
-    // const isFollowing = currentUser.following.some(
-    //   (id) => id.toString() === targetUser._id.toString(),
+    // some method
+    // const isFollowing = req.user.following.some(
+    //   (id) => id.toString() === req.params.id.toString(),
     // );
 
     if (isFollowing) {
       // unfollow
-      await User.findByIdAndUpdate(
+      await User.updateOne(
         { _id: req.user._id },
         {
           $pull: {
-            following: targetUser._id.toString(),
+            following: req.params.id,
           },
         },
       );
-      await User.findByIdAndUpdate(
+
+      await User.updateOne(
         { _id: req.params.id },
         {
           $pull: {
-            followers: currentUser._id.toString(),
+            followers: req.user._id,
           },
         },
       );
-      return res.status(200).json({ message: "Unfollowed User" });
+      res.status(200).json({ message: "Unfollowed" });
     } else {
-      //follow
-      await User.findByIdAndUpdate(
-        { _id: req.params.id },
+      // follow
+      await User.updateOne(
+        {
+          _id: req.user._id,
+        },
         {
           $push: {
-            followers: currentUser._id.toString(),
+            following: req.params.id,
           },
         },
       );
-      await User.findByIdAndUpdate(
-        { _id: req.user._id },
+      await User.updateOne(
+        { _id: req.params.id },
         {
           $push: {
-            following: targetUser._id.toString(),
+            followers: req.user._id,
           },
         },
       );
 
       const newNotification = new Notification({
-        from: req.user._id,
-        to: req.params.id,
+        from: req.user._id.toString(),
+        to: req.params.id.toString(),
         type: "follow",
       });
-
-      await newNotification.save();
-      return res.status(200).json(newNotification);
+      res.status(200).json(newNotification);
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Error in followUnfollow" });
+    return res.status(500).json({ message: "Erorr in followUnfollow" });
   }
 };
 
