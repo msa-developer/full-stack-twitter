@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    userName: {
+    fullName: {
+      type: String,
+      required: true,
+    },
+    email: {
       type: String,
       required: true,
       unique: true,
@@ -10,45 +14,40 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minLen: 6,
     },
-    email: {
+    userName: {
       type: String,
       required: true,
       unique: true,
-    },
-    profilPic: {
-      type: String,
-      default: "",
-    },
-    coverPic: {
-      type: String,
-      default: "",
     },
     bio: {
       type: String,
       default: "",
     },
-    link: {
+    profilePic: {
+      type: String,
+      default: "",
+    },
+    coverbg: {
       type: String,
       default: "",
     },
     following: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
         default: [],
       },
     ],
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
         default: [],
       },
     ],
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
 const User = mongoose.model("user", userSchema);

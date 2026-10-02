@@ -1,19 +1,19 @@
 import express from "express";
-import checkAuthUser from "../middleware/checkAuth.js";
+import checkAuthUser from "../middleware/checkAuthUser.js";
 import {
-  followUnfollowUser,
-  getSuggestedUsers,
-  getUserDetails,
-  updateUserProfile,
+  followUnfollow,
+  suggestUsers,
+  updateprofile,
+  getProfile,
 } from "../controllers/user.controller.js";
 
 const userRouter = express.Router();
 
 userRouter.use(checkAuthUser);
 
-userRouter.get("/profile", getUserDetails);
-userRouter.get("/suggestedUsers", getSuggestedUsers);
-userRouter.post("/followers/:id", followUnfollowUser);
-userRouter.post("/update", updateUserProfile);
+userRouter.get("/profile/:userName", getProfile);
+userRouter.get("/suggestUsers", suggestUsers);
+userRouter.post("/updateProfile", updateprofile);
+userRouter.post("/follow/:id", followUnfollow);
 
 export default userRouter;

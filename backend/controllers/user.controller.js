@@ -1,21 +1,9 @@
 import User from "../models/user.model.js";
-import Notification from "../models/notificatoin.model.js";
-import bcrypt from "bcrypt";
 import { v2 as cloudinary } from "cloudinary";
 
-export const getUserDetails = async (req, res) => {
+export const suggestUsers = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    return res.status(200).json(user);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "error in getUserDetails" });
-  }
-};
-
-export const getSuggestedUsers = async (req, res) => {
-  try {
-    const suggestedUsers = await User.aggregate([
+    const users = await User.aggregate([
       {
         $match: {
           _id: {
@@ -34,129 +22,153 @@ export const getSuggestedUsers = async (req, res) => {
         },
       },
     ]);
-    return res.status(200).json(suggestedUsers);
+    return res.status(200).json(users);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "error in getSuggestedUsers" });
+    return res.status(500).json({ message: "error in suggestUsers" });
   }
 };
 
-export const followUnfollowUser = async (req, res) => {
+export const followUnfollow = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user._id);
+    const targetUser = await User.findById(req.params.id);
 
-    if (currentUser._id.toString() === req.params.id.toString())
+    const isFollowing = currentUser.following.includes(targetUser._id);
+
+    if (req.user._id.toString() === req.params.id.toString())
       return res
         .status(400)
         .json({ message: "cannot follow or unfollow yourself" });
 
-    if (currentUser.following.includes(req.params.id.toString())) {
+    if (isFollowing) {
       // unfollow
-      await User.findByIdAndUpdate(req.user._id, {
-        $pull: {
-          following: req.params.id,
+      await User.findById(
+        req.user._id,
+        {
+          $pull: {
+            following: req.params.id,
+          },
         },
-      });
-      await User.findByIdAndUpdate(req.params.id, {
-        $pull: {
-          followers: req.user._id,
+        { new: true },
+      );
+      await User.findById(
+        req.params.id,
+        {
+          $pull: {
+            followers: req.user._id,
+          },
         },
-      });
-      return res.status(200).json({ message: "unfollowed User" });
+        { new: true },
+      );
+      return res.status(200).json({ message: "Unfollowed User" });
     } else {
-      // follow
-      await User.findByIdAndUpdate(req.user._id, {
-        $push: {
-          following: req.params.id,
+      //follow
+      await User.findById(
+        req.params.id,
+        {
+          $push: {
+            followers: req.user._id,
+          },
         },
-      });
-      await User.findByIdAndUpdate(req.params.id, {
-        $push: {
-          followers: req.user._id,
+        { new: true },
+      );
+      await User.findById(
+        req.user._id,
+        {
+          $push: {
+            following: req.params.id,
+          },
         },
-      });
+        { new: true },
+      );
 
       const newNotification = new Notification({
         from: req.user._id,
         to: req.params.id,
         type: "follow",
       });
+
       await newNotification.save();
-      return res.status(200).json({ message: "followed" });
+      return res.status(200).json(newNotification);
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "error in followUnfollowUser" });
+    return res.status(500).json({ message: "Error in followUnfollow" });
   }
 };
 
-export const updateUserProfile = async (req, res) => {
+export const updateprofile = async (req, res) => {
+  const {
+    email,
+    fullName,
+    currentPassword,
+    newPassword,
+    profilePic,
+    coverbg,
+    userName,
+  } = req.body;
+
   try {
-    const {
-      fullName,
-      userName,
-      email,
-      newPassword,
-      currentPassword,
-      bio,
-      link,
-    } = req.body;
-    let { profileImg, coverImg } = req.body;
+    const user = await User.findById(req.user._id);
+    let profileUrl = null;
+    let coverBgUrl = null;
 
-    let user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (profilePic) {
+      if (user.profilePic)
+        await cloudinary.uploader
+          .upload()
+          .destroy(user.profilePic.split("/").pop().split(".")[0]);
 
-    // manage password
-    if (!currentPassword || !newPassword)
-      return res.status(400).json({ message: "Provide all pasword fields" });
-
-    const isCurrentPasswordCorrect = await bcrypt.compare(
-      currentPassword,
-      user.password,
-    );
-    if (!isCurrentPasswordCorrect)
-      return res.status(400).json({ message: "current password incorrect" });
-
-    if (newPassword.length < 6)
-      return res
-        .status(400)
-        .json({ message: "password should contain minimum 6 characters" });
-
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(newPassword, salt);
-
-    if (profileImg) {
-      //https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg
-      if (user.profileImg)
-        await cloudinary.uploader.destroy(
-          user.profileImg.split("/").pop().split(".")[0],
-        );
-      const profile = await cloudinary.uploader.upload(profileImg);
-      const url = profile.secure_url;
-      profileImg = url;
+      const uploadProfile = await cloudinary.uploader.upload(profilePic);
+      profileUrl = uploadProfile.secure_url;
     }
 
-    if (coverImg) {
-      if (user.coverImg)
-        await cloudinary.uploader.desotry(
-          user.coverImg.split("/").pop().split(".")[0],
-        );
-      const upload = await cloudinary.uploader.upload(coverImg);
-      const url = upload.secure_url;
-      coverImg = url;
+    if (coverbg) {
+      if (user.coverbg)
+        await cloudinary.uploader
+          .upload()
+          .destroy(user.coverbg.split("/").pop().split(".")[0]);
+
+      const uploadCoverBg = await cloudinary.uploader.upload(coverbg);
+      coverBgUrl = uploadCoverBg.secure_url;
     }
 
-    user.password = hashPassword || user.password;
+    if (newPassword && currentPassword) {
+      const isPasswordCorrect = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
+      if (!isPasswordCorrect)
+        return res.status(400).json({ message: "incorrect passwords" });
+
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(newPassword, salt);
+    }
+
+    user.profileUrl = profileUrl || user.profileUrl;
+    user.coverbg = coverBgUrl || user.coverBgUrl;
+    user.userName = userName || user.userName;
     user.email = email || user.email;
     user.fullName = fullName || user.fullName;
-    user.userName = userName || user.userName;
-    user.bio = bio || user.bio;
-    user.link = link || user.link;
+    user.password = hashPassword || user.password;
 
-    user.password = null;
     return res.status(200).json(user);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "error in updateUserProfile" });
+    return res.status(500).json({ message: "Erorr in updateProfile" });
+  }
+};
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findOne({ userName: req.params.userName }).select(
+      "-password",
+    );
+    if (!user) return res.status(404).json({ message: "user not found" });
+    return res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Erorr in getProfile function" });
   }
 };

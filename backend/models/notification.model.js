@@ -2,20 +2,17 @@ import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema(
   {
-    type: {
-      type: String,
-      enum: ["reply", "follow", "like"],
-      required: true,
-    },
     from: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "User",
+      type: mongoose.Schema.Types.ObjectId,
     },
     to: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "User",
+      type: mongoose.Schema.Types.ObjectId,
+    },
+    type: {
+      type: String,
+      enum: ["follow", "reply", "comment", "like"],
     },
   },
   { timestamps: true },
