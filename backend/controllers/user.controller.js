@@ -113,7 +113,7 @@ export const updateprofile = async (req, res) => {
   } = req.body;
 
   try {
-    const user = await User.findById(req.user._id);
+    let user = await User.findById(req.user._id);
     let profileUrl = null;
     let coverBgUrl = null;
 
