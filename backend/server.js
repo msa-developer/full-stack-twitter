@@ -5,7 +5,6 @@ import authRouter from "./routes/auth.route.js";
 import userRouter from "./routes/user.route.js";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
-import postRouter from "./routes/post.route.js";
 
 const app = express();
 
