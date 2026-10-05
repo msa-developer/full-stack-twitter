@@ -35,7 +35,46 @@ export const createPost = async (req, res) => {
   }
 };
 
-export const likeUnlike = async (req, res) => {};
+export const likeUnlike = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: postId } = req.params.id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) return res.status(404).json({ message: "post not found" });
+
+    const userLikedThisPost = post.likes.includes(userId);
+
+    if (userLikedThisPost) {
+      // unlike
+      await Post.updateOne(
+        { _id: postId },
+        {
+          $pull: {
+            likes: userId,
+          },
+        },
+      );
+      return res.status(200).json({ message: "User disliked your post" });
+    } else {
+      //like
+      post.likes.push(userId);
+
+      const newNotification = new Notification({
+        from: userId,
+        to: post.user,
+        type: "like",
+      });
+      await newNotification.save();
+
+      return res.status(200).json(newNotification);
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "error in likeUnlike" });
+  }
+};
 
 export const commentpost = async (req, res) => {
   try {
@@ -69,7 +108,7 @@ export const deletePost = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (post.image) {
-      await cloudinary.upload.destroy(
+      await cloudinary.uploader.destroy(
         post.image.split("/").pop().split(".")[0],
       );
     }
