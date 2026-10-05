@@ -10,8 +10,8 @@ import postRouter from "./routes/post.route.js";
 const app = express();
 
 app.use(cookieParser());
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,

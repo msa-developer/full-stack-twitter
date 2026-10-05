@@ -37,7 +37,27 @@ export const createPost = async (req, res) => {
 
 export const likeUnlike = async (req, res) => {};
 
-export const commentpost = async (req, res) => {};
+export const commentpost = async (req, res) => {
+  try {
+    const { text } = req.body;
+    const postId = req.params.id;
+    const userId = req.user._id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) return res.status(404).json({ message: "post not found" });
+    if (!text)
+      return res.status(400).json({ message: "text field is required" });
+
+    const comment = { user: userId, text };
+    post.comments.push(comment);
+    await post.save();
+
+    return res.status(201).json(comment);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 export const deletePost = async (req, res) => {
   try {
