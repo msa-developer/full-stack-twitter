@@ -14,6 +14,6 @@ postRouter.use(checkAuthUser);
 postRouter.post("/create", createPost);
 postRouter.post("/like/:id", likeUnlike);
 postRouter.get("/comment/:id", commentpost);
-postRouter.get("/:id", deletePost);
+postRouter.delete("/:id", deletePost);
 
 export default postRouter;
