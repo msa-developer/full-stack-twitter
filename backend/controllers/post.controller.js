@@ -120,3 +120,19 @@ export const deletePost = async (req, res) => {
     return res.status(500).json({ message: "post deleted" });
   }
 };
+
+export const getAllPosts = async (_, res) => {
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 }).populate({
+      path: "user",
+      select: "-password",
+    });
+
+    if (posts.length === 0) return res.status(400).json([]);
+
+    return res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error in getAllPosts" });
+  }
+};

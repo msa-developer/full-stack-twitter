@@ -11,6 +11,7 @@ const postRouter = express.Router();
 
 postRouter.use(checkAuthUser);
 
+postRouter.get("/allposts", getAllPosts);
 postRouter.post("/create", createPost);
 postRouter.post("/like/:id", likeUnlike);
 postRouter.post("/comment/:id", commentpost);
