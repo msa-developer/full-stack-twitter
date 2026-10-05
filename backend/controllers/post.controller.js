@@ -36,5 +36,15 @@ export const createPost = async (req, res) => {
 };
 
 export const likeUnlike = async (req, res) => {};
+
 export const commentpost = async (req, res) => {};
-export const deletePost = async (req, res) => {};
+
+export const deletePost = async (req, res) => {
+  try {
+    await Post.findByIdAndDelete(req.params.id);
+    return res.status(200).json({ message: "post deleted" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "post deleted" });
+  }
+};
