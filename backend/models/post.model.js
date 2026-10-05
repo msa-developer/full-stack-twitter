@@ -2,16 +2,16 @@ import mongoose from "mongoose";
 
 const postSchema = new mongoose.Schema(
   {
+    text: {
+      type: String,
+    },
+    image: {
+      type: String,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       required: true,
-    },
-    text: {
-      type: String,
-    },
-    img: {
-      type: String,
     },
     likes: [
       {
@@ -21,19 +21,21 @@ const postSchema = new mongoose.Schema(
     ],
     comments: [
       {
-        text: {
-          type: String,
-          required: true,
-        },
         user: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
           ref: "user",
         },
+        text: {
+          type: String,
+          required: true,
+        },
       },
     ],
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
 const Post = mongoose.model("post", postSchema);
