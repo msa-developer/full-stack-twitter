@@ -37,22 +37,45 @@ export const createPost = async (req, res) => {
 
 export const likeUnlike = async (req, res) => {};
 
-export const commentpost = async (req, res) => {};
+export const commentpost = async (req, res) => {
+  try {
+    const { text } = req.body;
+    const postId = req.params.id;
+    const userId = req.user._id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) return res.status(404).json({ message: "post not found" });
+    if (!text)
+      return res.status(400).json({ message: "text field is required" });
+
+    const comment = { user: userId, text };
+    post.comments.push(comment);
+    await post.save();
+
+    return res.status(201).json(comment);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "post not found" });
 
     const user = await User.findById(post.user);
 
     if (!user) return res.status(404).json({ message: "User not found" });
-    
-    if(post.image){
-      await cloudinary.uploader.destroy(post.image.split("/").pop().split(".").[0])
+
+    if (post.image) {
+      await cloudinary.upload.destroy(
+        post.image.split("/").pop().split(".")[0],
+      );
     }
-    
-    await findByIdAndDelete(req.params.id)
-    return res.status(200).json({message:"post deleted"})
+
+    await Post.findByIdAndDelete(req.params.id);
+    return res.status(200).json({ message: "post deleted" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "post deleted" });
