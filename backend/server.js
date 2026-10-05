@@ -21,7 +21,6 @@ cloudinary.config({
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
-app.use("/api/post", postRouter);
 
 connectDB().then(() => {
   app.listen(process.env.PORT, () => {
