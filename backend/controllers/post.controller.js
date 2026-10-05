@@ -41,8 +41,18 @@ export const commentpost = async (req, res) => {};
 
 export const deletePost = async (req, res) => {
   try {
-    await Post.findByIdAndDelete(req.params.id);
-    return res.status(200).json({ message: "post deleted" });
+    const post = await Post.findById(req.params.id);
+
+    const user = await User.findById(post.user);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    if(post.image){
+      await cloudinary.uploader.destroy(post.image.split("/").pop().split(".").[0])
+    }
+    
+    await findByIdAndDelete(req.params.id)
+    return res.status(200).json({message:"post deleted"})
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "post deleted" });
