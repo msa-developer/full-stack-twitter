@@ -1,6 +1,5 @@
 import Post from "../models/post.model.js";
 import { v2 as cloudinary } from "cloudinary";
-import Notification from "../models/notification.model.js";
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -41,7 +40,7 @@ export const createPost = async (req, res) => {
 
 export const likeUnlike = async (req, res) => {
   try {
-    const post = await Post.findById({ _id: req.params.id });
+    const post = await User.findById({ _id: req.params.id });
     if (!post) return res.status(404).json({ message: "post not found" });
 
     const alreadyLiked = post.likes.includes(req.user._id);
@@ -56,26 +55,8 @@ export const likeUnlike = async (req, res) => {
           },
         },
       );
-      return res.status(200).json({ message: "user unliked your post" });
     } else {
       //like
-      await Post.updateOne(
-        { _id: req.params.id },
-        {
-          $push: {
-            likes: req.user._id,
-          },
-        },
-      );
-
-      const notification = new Notification({
-        from: req.user._id,
-        to: req.params.id,
-        type: "like",
-      });
-      await notification.save();
-
-      return res.status(200).json(notification);
     }
   } catch (err) {
     console.error(err);
