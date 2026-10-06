@@ -38,6 +38,26 @@ export const createPost = async (req, res) => {
   }
 };
 
+export const commentpost = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) return res.status(400).json({ message: "comment is empty" });
+
+    const post = await Post.findById({ _id: req.params.id });
+    if (!post) return res.status(404).json({ message: "post not found" });
+
+    const comment = { user: req.user._id, text };
+    post.comments.push(comment);
+
+    await post.save();
+    return res.status(200).json(post);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "error in commentpost" });
+  }
+};
+
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById({ _id: req.params.id });

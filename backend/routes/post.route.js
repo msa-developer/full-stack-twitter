@@ -1,5 +1,5 @@
 import {
-  // commentpost,
+  commentpost,
   createPost,
   getAllPosts,
   deletePost,
@@ -15,7 +15,7 @@ postRouter.use(checkAuthUser);
 postRouter.get("/allposts", getAllPosts);
 postRouter.post("/create", createPost);
 // postRouter.post("/like/:id", likeUnlike);
-// postRouter.post("/comment/:id", commentpost);
+postRouter.post("/comment/:id", commentpost);
 postRouter.delete("/:id", deletePost);
 
 export default postRouter;
