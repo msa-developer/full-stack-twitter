@@ -4,6 +4,7 @@ import {
   getAllPosts,
   deletePost,
   likeUnlike,
+  likedPosts,
 } from "../controllers/post.controller.js";
 import checkAuthUser from "../middleware/checkAuthUser.js";
 import express from "express";
@@ -13,6 +14,7 @@ const postRouter = express.Router();
 postRouter.use(checkAuthUser);
 
 postRouter.get("/allposts", getAllPosts);
+postRouter.get("/likedposts/:id", likedPosts);
 postRouter.post("/create", createPost);
 postRouter.post("/like/:id", likeUnlike);
 postRouter.post("/comment/:id", commentpost);

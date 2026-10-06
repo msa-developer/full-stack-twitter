@@ -1,13 +1,20 @@
 import Post from "../models/post.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import Notification from "../models/notification.model.js";
+import User from "../models/user.model.js";
 
 export const getAllPosts = async (_, res) => {
   try {
-    const post = await Post.find().sort({ createdAt: -1 }).populate({
-      path: "user",
-      select: "-password",
-    });
+    const post = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
     return res.status(200).json(post);
   } catch (err) {
     console.error(err);
@@ -61,16 +68,23 @@ export const likeUnlike = async (req, res) => {
           },
         },
       );
+      await User.updateOne(
+        {
+          _id: req.user._id,
+        },
+        {
+          $pull: {
+            likedPosts: req.params.id,
+          },
+        },
+      );
       return res.status(200).json({ message: "user unliked your post" });
     } else {
       //like
-      await Post.updateOne(
-        { _id: req.params.id },
-        {
-          $push: {
-            likes: req.user._id,
-          },
-        },
+      post.likes.push(req.user._id);
+      await User.updateOne(
+        { _id: req.user._id },
+        { $push: { likedPosts: req.params.id } },
       );
 
       const notification = new Notification({
@@ -128,5 +142,28 @@ export const deletePost = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "delete post" });
+  }
+};
+
+export const likedPosts = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "user not found" });
+
+    const posts = await Post.find({ _id: { $in: user.likedPosts } })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+    return res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "error in likedPosts" });
   }
 };
