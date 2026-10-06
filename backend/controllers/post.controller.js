@@ -1,83 +1,39 @@
 import Post from "../models/post.model.js";
 import { v2 as cloudinary } from "cloudinary";
-import User from "../models/user.model.js";
+
+export const getAllPosts = async (req, res) => {
+  try {
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "error in getAllPosts" });
+  }
+};
 
 export const createPost = async (req, res) => {
   try {
-    const { text } = req.body;
-    let { image } = req.body;
-
-    const user = await User.findById({ _id: req.user._id }).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const { text, image } = req.body;
+    let img_url = null;
 
     if (!text && !image)
       return res
         .status(400)
-        .json({ message: "post must contain and image or text" });
+        .json({ message: "post must contains a text or an image" });
 
     if (image) {
-      const uploadImg = await cloudinary.uploader.upload(image);
-      const imgSecureUrl = uploadImg.secure_url;
-      let image = imgSecureUrl;
+      const upload = await cloudinary.uploader.upload(image);
+      img_url = upload.secure_url;
     }
 
     const newPost = new Post({
-      user: user._id,
+      user: req.user._id,
       text,
-      image,
+      image: img_url,
     });
-
     await newPost.save();
+
     return res.status(201).json(newPost);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Erorr in createPost" });
-  }
-};
-
-export const likeUnlike = async (req, res) => {};
-
-export const commentpost = async (req, res) => {
-  try {
-    const { text } = req.body;
-    const postId = req.params.id;
-    const userId = req.user._id;
-
-    const post = await Post.findById(postId);
-
-    if (!post) return res.status(404).json({ message: "post not found" });
-    if (!text)
-      return res.status(400).json({ message: "text field is required" });
-
-    const comment = { user: userId, text };
-    post.comments.push(comment);
-    await post.save();
-
-    return res.status(201).json(comment);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-export const deletePost = async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "post not found" });
-
-    const user = await User.findById(post.user);
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (post.image) {
-      await cloudinary.upload.destroy(
-        post.image.split("/").pop().split(".")[0],
-      );
-    }
-
-    await Post.findByIdAndDelete(req.params.id);
-    return res.status(200).json({ message: "post deleted" });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "post deleted" });
+    return res.status(500).json({ messsage: "error in createPost" });
   }
 };

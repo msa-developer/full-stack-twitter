@@ -119,9 +119,9 @@ export const updateprofile = async (req, res) => {
 
     if (profilePic) {
       if (user.profilePic)
-        await cloudinary.uploader
-          .upload()
-          .destroy(user.profilePic.split("/").pop().split(".")[0]);
+        await cloudinary.uploader.destroy(
+          user.profilePic.split("/").pop().split(".")[0],
+        );
 
       const uploadProfile = await cloudinary.uploader.upload(profilePic);
       profileUrl = uploadProfile.secure_url;
@@ -129,9 +129,9 @@ export const updateprofile = async (req, res) => {
 
     if (coverbg) {
       if (user.coverbg)
-        await cloudinary.uploader
-          .upload()
-          .destroy(user.coverbg.split("/").pop().split(".")[0]);
+        await cloudinary.uploader.destroy(
+          user.coverbg.split("/").pop().split(".")[0],
+        );
 
       const uploadCoverBg = await cloudinary.uploader.upload(coverbg);
       coverBgUrl = uploadCoverBg.secure_url;
