@@ -2,8 +2,13 @@ import Post from "../models/post.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import Notification from "../models/notification.model.js";
 
-export const getAllPosts = async (req, res) => {
+export const getAllPosts = async (_, res) => {
   try {
+    const post = await Post.find().sort({ createdAt: -1 }).populate({
+      path: "user",
+      select: "-password",
+    });
+    return res.status(200).json(post);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "error in getAllPosts" });
