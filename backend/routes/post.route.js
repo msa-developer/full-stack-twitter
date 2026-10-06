@@ -6,6 +6,7 @@ import {
   likeUnlike,
   likedPosts,
   getFollowingUsers,
+  getUserPosts,
 } from "../controllers/post.controller.js";
 import checkAuthUser from "../middleware/checkAuthUser.js";
 import express from "express";
@@ -16,6 +17,7 @@ postRouter.use(checkAuthUser);
 
 postRouter.get("/allposts", getAllPosts);
 postRouter.get("/following", getFollowingUsers);
+postRouter.get("/user/:userName", getUserPosts);
 postRouter.get("/likedposts/:id", likedPosts);
 postRouter.post("/create", createPost);
 postRouter.post("/like/:id", likeUnlike);

@@ -192,3 +192,28 @@ export const getFollowingUsers = async (req, res) => {
     return res.status(500).json({ message: "Erorr in getFollowingUsers" });
   }
 };
+
+export const getUserPosts = async (req, res) => {
+  try {
+    const { userName } = req.params;
+    const user = await User.findOne({
+      userName: userName,
+    });
+    if (!user) return res.status(404).json({ message: "user not found" });
+
+    const posts = await Post.find({ user: { $in: user._id } })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+    return res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "error in getUserPosts" });
+  }
+};
