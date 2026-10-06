@@ -3,7 +3,7 @@ import {
   createPost,
   getAllPosts,
   deletePost,
-  // likeUnlike,
+  likeUnlike,
 } from "../controllers/post.controller.js";
 import checkAuthUser from "../middleware/checkAuthUser.js";
 import express from "express";
@@ -14,7 +14,7 @@ postRouter.use(checkAuthUser);
 
 postRouter.get("/allposts", getAllPosts);
 postRouter.post("/create", createPost);
-// postRouter.post("/like/:id", likeUnlike);
+postRouter.post("/like/:id", likeUnlike);
 postRouter.post("/comment/:id", commentpost);
 postRouter.delete("/:id", deletePost);
 
