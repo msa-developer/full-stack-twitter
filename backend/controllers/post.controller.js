@@ -167,3 +167,28 @@ export const likedPosts = async (req, res) => {
     return res.status(500).json({ message: "error in likedPosts" });
   }
 };
+
+export const getFollowingUsers = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "user not found" });
+
+    const following = user.following;
+
+    const feedPosts = await Post.find({ user: { $in: following } })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user",
+        select: "-password",
+      });
+
+    return res.status(200).json(feedPosts);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Erorr in getFollowingUsers" });
+  }
+};
