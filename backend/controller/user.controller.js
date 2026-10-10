@@ -139,7 +139,7 @@ export const updateprofile = async (req, res) => {
 
 export const getUserDetails = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select("-password");
     if (!user) return res.status(404).json({ message: "user not found" });
     return res.status(200).json(user);
   } catch (err) {
@@ -151,9 +151,37 @@ export const getUserDetails = async (req, res) => {
 export const getUserByUserName = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).select("-password");
     if (!user) return res.status(404).json({ message: "user not found" });
     return res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "error in getUserByUserName" });
+  }
+};
+
+export const getSuggestedUsers = async (req, res) => {
+  try {
+    const suggestedUsers = await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $nin: [req.user._id, ...req.user.following],
+          },
+        },
+      },
+      {
+        $sample: {
+          size: 4,
+        },
+      },
+      {
+        $project: {
+          password: 0,
+        },
+      },
+    ]);
+    return res.status(200).json(suggestedUsers);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "error in getUserByUserName" });
