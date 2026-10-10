@@ -1,14 +1,14 @@
 import express from "express";
-import { login, logout, signup } from "../controllers/auth.controller.js";
+import { login, logout, signup } from "../controller/auth.controller.js";
 import checkAuthUser from "../middleware/checkAuthUser.js";
 
-const authRouter = express.Router();
+const router = express.Router();
 
-authRouter.post("/signup", signup);
-authRouter.post("/login", login);
-authRouter.post("/logout", logout);
-authRouter.get("/checkAuthUser", checkAuthUser, (req, res) =>
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/logout", logout);
+router.get("/check", checkAuthUser, (req, res) =>
   res.status(200).json(req.user),
 );
 
-export default authRouter;
+export default router;

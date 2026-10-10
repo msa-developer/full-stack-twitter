@@ -2,7 +2,12 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    fullname: {
       type: String,
       required: true,
     },
@@ -14,21 +19,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-    },
-    userName: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    bio: {
-      type: String,
-      default: "",
+      minLen: 6,
     },
     profilePic: {
       type: String,
       default: "",
     },
-    coverbg: {
+    coverBg: {
       type: String,
       default: "",
     },
@@ -47,8 +44,7 @@ const userSchema = new mongoose.Schema(
     likedPosts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "post",
-        default: [],
+        ref: "user",
       },
     ],
   },

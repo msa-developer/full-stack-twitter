@@ -1,23 +1,26 @@
-import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
 const checkAuthUser = async (req, res, next) => {
   try {
     const token = req.cookies.jwt;
-    if (!token) return res.status(401).json({ message: "Unauthorized User" });
 
-    const verifyToken = jwt.verify(token, process.env.JWT_SECRET);
-    if (!verifyToken) return res.status(401).json({ message: "invalid token" });
+    if (!token) return res.status(401).json({ message: "unauthorized user" });
 
-    const user = await User.findById(verifyToken.userId);
+    const isTokenValid = jwt.verify(token, process.env.JWT_SECRET);
+    if (!isTokenValid)
+      return res.status(401).json({ message: "token expired" });
+
+    const userId = isTokenValid.userId;
+
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "user not found" });
 
     req.user = user;
-
     next();
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Erorr in checkAuthUser func" });
+    console.error(err);
+    return res.status(500).json({ message: "error in checkAuthUser function" });
   }
 };
 

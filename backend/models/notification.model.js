@@ -3,16 +3,16 @@ import mongoose from "mongoose";
 const notificationSchema = new mongoose.Schema(
   {
     from: {
-      ref: "user",
       type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
     },
     to: {
-      ref: "user",
       type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
     },
     type: {
       type: String,
-      enum: ["follow", "reply", "comment", "like"],
+      enum: ["like", "follow"],
     },
   },
   { timestamps: true },
