@@ -21,3 +21,21 @@ export const deleteNotifications = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const deleteNotifcationById = async (req, res) => {
+  try {
+    if (req.params.toString() !== req.user._id.toString())
+      return res
+        .status(403)
+        .json({ message: "unauthorized user cannot delete notification" });
+
+    const notification = await Notification.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json(notification);
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "error in deleteNotifcationById func" });
+  }
+};
