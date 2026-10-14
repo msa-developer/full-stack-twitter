@@ -1,15 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
-const notificationSchema = new mongoose.Schema(
+interface INotification {
+  from: Types.ObjectId;
+  to: Types.ObjectId;
+  read: boolean;
+  type: "follow" | "like";
+}
+
+const notificationSchema = new mongoose.Schema<INotification>(
   {
     from: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
     },
     to: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
     },
     type: {
@@ -25,6 +32,9 @@ const notificationSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Notification = mongoose.model("notifications", notificationSchema);
+const Notification = mongoose.model<INotification>(
+  "notifications",
+  notificationSchema,
+);
 
 export default Notification;

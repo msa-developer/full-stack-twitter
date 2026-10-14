@@ -1,6 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
-const userSchema = new mongoose.Schema(
+export interface IUser {
+  username: string;
+  fullName: string;
+  password: string;
+  email: string;
+  profilePic?: string;
+  coverBg?: string;
+  bio?: string;
+  link?: string;
+  followers: Types.ObjectId[];
+  following: Types.ObjectId[];
+  likedPosts: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const userSchema = new mongoose.Schema<IUser>(
   {
     username: {
       type: String,
@@ -15,6 +31,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minLength: 6,
+      select: false,
     },
     email: {
       type: String,
@@ -24,45 +41,37 @@ const userSchema = new mongoose.Schema(
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: [],
+        ref: "user",
       },
     ],
     following: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: [],
+        ref: "user",
       },
     ],
     profilePic: {
       type: String,
-      default: "",
     },
     coverBg: {
       type: String,
-      default: "",
     },
     bio: {
       type: String,
-      default: "",
     },
-
     link: {
       type: String,
-      default: "",
     },
     likedPosts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-        default: [],
+        ref: "post",
       },
     ],
   },
   { timestamps: true },
 );
 
-const User = mongoose.model("users", userSchema);
+const User = mongoose.model<IUser>("user", userSchema);
 
 export default User;

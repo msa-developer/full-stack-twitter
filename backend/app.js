@@ -1,5 +1,5 @@
 import path from "path";
-import express from "express";
+import express,type{Response,Request} from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
@@ -37,7 +37,7 @@ app.use("/api/notifications", notificationRoutes);
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
-	app.get("*", (req, res) => {
+	app.get("*", (_, res) => {
 		res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
 	});
 }

@@ -1,8 +1,8 @@
-import express from "express";
+import express,{type Router} from "express";
 import { getMe, login, logout, signup } from "../handlers/authHandler.js";
 import { requireAuth } from "../guards/requireAuth.js";
 
-const router = express.Router();
+const router:Router = express.Router();
 
 router.get("/me", requireAuth, getMe);
 router.post("/signup", signup);
