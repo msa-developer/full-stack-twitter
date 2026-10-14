@@ -1,7 +1,7 @@
-import User from "../models/user.model.js";
+import User from "../schemas/userSchema.js";
 import jwt from "jsonwebtoken";
 
-export const protectRoute = async (req, res, next) => {
+export const requireAuth = async (req, res, next) => {
 	try {
 		const token = req.cookies.jwt;
 		if (!token) {
@@ -23,7 +23,7 @@ export const protectRoute = async (req, res, next) => {
 		req.user = user;
 		next();
 	} catch (err) {
-		console.log("Error in protectRoute middleware", err.message);
+		console.log("Error in requireAuth middleware", err.message);
 		return res.status(500).json({ error: "Internal Server Error" });
 	}
 };

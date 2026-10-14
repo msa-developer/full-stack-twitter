@@ -1,6 +1,6 @@
-import Notification from "../models/notification.model.js";
-import Post from "../models/post.model.js";
-import User from "../models/user.model.js";
+import Notification from "../schemas/notificationSchema.js";
+import Post from "../schemas/postSchema.js";
+import User from "../schemas/userSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const createPost = async (req, res) => {

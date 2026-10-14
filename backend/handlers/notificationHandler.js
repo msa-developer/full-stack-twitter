@@ -1,4 +1,4 @@
-import Notification from "../models/notification.model.js";
+import Notification from "../schemas/notificationSchema.js";
 
 export const getNotifications = async (req, res) => {
   try {
