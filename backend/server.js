@@ -1,15 +1,15 @@
 import path from "path";
-import express,type{Response,Request} from "express";
+import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 
-import authRoutes from "./routers/authRouter.js";
-import userRoutes from "./routers/userRouter.js";
-import postRoutes from "./routers/postRouter.js";
-import notificationRoutes from "./routers/notificationRouter.js";
+import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+import postRoutes from "./routes/post.route.js";
+import notificationRoutes from "./routes/notification.route.js";
 
-import connectDB from "./database/connect.js";
+import connectMongoDB from "./db/connectMongoDB.js";
 
 dotenv.config();
 
@@ -37,12 +37,12 @@ app.use("/api/notifications", notificationRoutes);
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
-	app.get("*", (_, res) => {
+	app.get("*", (req, res) => {
 		res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
 	});
 }
 
 app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}`);
-	connectDB();
+	connectMongoDB();
 });
