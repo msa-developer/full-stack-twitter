@@ -10,6 +10,9 @@ const Signup = () => {
     password: "",
   });
 
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: [e.target.value] });
+
   return (
     <main className="flex items-center justify-center min-h-screen">
       <section className="flex gap-8 flex-col md:flex-row md:items-start items-center">
@@ -26,7 +29,7 @@ const Signup = () => {
         </div>
 
         <form className="flex flex-col items-center gap-3">
-          <h2 className="font-bold flex-end">Join Today.</h2>
+          <h2 className="font-bold">Join Today.</h2>
           <label className="input validator">
             <svg
               className="h-[1em] opacity-50"
@@ -46,10 +49,9 @@ const Signup = () => {
             </svg>
             <input
               type="email"
+              name="email"
               placeholder="@gmail.com"
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => handleChange(e)}
               value={formData.email}
               required
             />
@@ -74,11 +76,10 @@ const Signup = () => {
             </svg>
             <input
               type="text"
+              name="username"
               required
               value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
+              onChange={(e) => handleChange(e)}
               placeholder="Username"
               pattern="[A-Za-z][A-Za-z0-9\-]*"
               minLength="3"
@@ -91,10 +92,9 @@ const Signup = () => {
             <CiEdit />
             <input
               placeholder="Full Name"
+              name="fullname"
               value={formData.fullname}
-              onChange={(e) =>
-                setFormData({ ...formData, fullname: e.target.value })
-              }
+              onChange={(e) => handleChange(e)}
             />
           </label>
 
@@ -118,10 +118,9 @@ const Signup = () => {
             </svg>
             <input
               type="password"
+              name="password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => handleChange(e)}
               required
               placeholder="Password"
               minLength="8"
@@ -129,12 +128,14 @@ const Signup = () => {
               title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
             />
           </label>
-          <button className="btn btn-active btn-info">Signup</button>
-          <p>Already have an account?</p>
+          <div className="flex flex-col w-full">
+            <button className="btn btn-active btn-info">Signup</button>
+            <p className="m-2.5 font-bold text-sm">Already have an account?</p>
 
-          <Link to={"/login"}>
-            <button className="btn btn-outline btn-info">Login</button>
-          </Link>
+            <Link to={"/login"} className="btn btn-outline btn-info w-full">
+              Login
+            </Link>
+          </div>
         </form>
       </section>
     </main>
