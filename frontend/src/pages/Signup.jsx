@@ -2,7 +2,7 @@ import React from "react";
 import { CiEdit } from "react-icons/ci";
 import { Link } from "react-router-dom";
 
-export function Signup() {
+function Signup() {
   const [formData, setFormData] = React.useState({
     fullname: "",
     email: "",
@@ -11,7 +11,7 @@ export function Signup() {
   });
 
   const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: [e.target.value] });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   return (
     <main className="flex items-center justify-center min-h-screen">
@@ -28,10 +28,8 @@ export function Signup() {
           </svg>
         </div>
 
-        <form className="flex flex-col items-center gap-3">
-          <h1 className="font-bold pl-3 text-xl md:text-2xl self-start">
-            Join Today.
-          </h1>
+        <form className="flex flex-col items-stretch gap-5 max-w-sm">
+          <h2 className="font-bold text-xl md:text-4xl ">Join Today.</h2>
           <label className="input validator">
             <svg
               className="h-[1em] opacity-50"
@@ -130,14 +128,12 @@ export function Signup() {
               title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
             />
           </label>
-          <div className="flex flex-col w-full">
-            <button className="btn btn-active btn-info">Signup</button>
-            <p className="m-2.5 font-bold text-sm">Already have an account?</p>
+          <button className="btn btn-active btn-info">Signup</button>
+          <p className="font-bold text-sm">Already have an account?</p>
 
-            <Link to={"/login"} className="btn btn-outline btn-info w-full">
-              Login
-            </Link>
-          </div>
+          <Link to={"/login"} className="btn btn-outline btn-info">
+            Login
+          </Link>
         </form>
       </section>
     </main>
