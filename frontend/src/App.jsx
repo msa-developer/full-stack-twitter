@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 
 function App() {
   return (
-    <div className="flex max-w-6xl mx-auto">
+    <div className="min-h-screen" data-theme="forest">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<Signup />} />
