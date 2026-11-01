@@ -2,7 +2,7 @@ import React from "react";
 import { CiEdit } from "react-icons/ci";
 import { Link } from "react-router-dom";
 
-const Signup = () => {
+export function Signup() {
   const [formData, setFormData] = React.useState({
     fullname: "",
     email: "",
@@ -29,7 +29,9 @@ const Signup = () => {
         </div>
 
         <form className="flex flex-col items-center gap-3">
-          <h2 className="font-bold">Join Today.</h2>
+          <h1 className="font-bold pl-3 text-xl md:text-2xl self-start">
+            Join Today.
+          </h1>
           <label className="input validator">
             <svg
               className="h-[1em] opacity-50"
@@ -140,6 +142,6 @@ const Signup = () => {
       </section>
     </main>
   );
-};
+}
 
 export default Signup;
